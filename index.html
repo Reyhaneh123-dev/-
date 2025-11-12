@@ -2,43 +2,15 @@
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>آزمایشگاه مجموعه‌ها</title>
-  <style>
-    /* پایه */
-    :root{--accent:#0077cc;--pink:#e91e63}
-    body{font-family: 'Vazir', Tahoma, sans-serif; margin:18px; background:#f7f9fc; color:#222}
-    h1{font-size:26px;margin-bottom:6px}
-    .card{background:white;border-radius:10px;padding:14px;box-shadow:0 6px 18px rgba(12,30,60,0.06);margin-bottom:14px}
-    label{display:inline-block;margin-left:8px}
-    input[type=text], textarea, select{padding:8px;border:1px solid #ddd;border-radius:6px;min-width:180px}
-    button{background:var(--accent);color:white;border:none;padding:8px 12px;border-radius:8px;cursor:pointer}
-    button.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
-    .flex{display:flex;gap:10px;align-items:center}
-    .wrap{flex-wrap:wrap}
-    .sets-list{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}
-    .set-item{border:1px solid #e6e6e6;padding:8px;border-radius:8px;min-width:130px}
-    .small{font-size:13px;color:#666}
-    pre{background:#fafafa;padding:8px;border-radius:6px;overflow:auto}
-
-    /* نمودار ون */
-    .venn-wrap{display:flex;gap:14px;align-items:flex-start}
-    .venn-svg{width:320px;height:240px;background:linear-gradient(180deg,#fff,#fbfdff);border-radius:6px;border:1px solid #eee}
-
-    /* محور عددی */
-    .numberline{padding:10px;border-radius:6px;border:1px dashed #ddd;background:white}
-
-    /* ریسپانسیو */
-    @media (max-width:700px){.venn-wrap{flex-direction:column}.venn-svg{width:100%}}
-
-    /* راهنمایی */
-    .hint{background:#fff8e6;border-left:4px solid #ffd166;padding:8px;border-radius:6px;color:#6b4f00}
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <h1>آزمایشگاه مجموعه‌ها</h1>
+
   <div class="card">
-    <div class="small">نسخهٔ تک‌فایلی HTML + JS + CSS — وارد کردن مجموعه‌ها و اجرای عملیات: ⊆، ∩، ∪، −، ∈</div>
+    <div class="small">نسخهٔ وب آموزشی برای بررسی و ترکیب مجموعه‌ها</div>
   </div>
 
   <div class="card">
@@ -51,9 +23,9 @@
       <button id="saveSet">ذخیره</button>
       <button id="clearSets" class="ghost">حذف همه</button>
     </div>
-
-    <div class="small" style="margin-top:8px">قالب‌ها: لیست صریح مانند <code>{1,2,3}</code> یا رنج <code>1-5</code> یا سازنده مانند <code>x ∈ N | x &lt; 10</code>. برای Q و R نمونه‌سازی محدود نمایش داده می‌شود.</div>
-
+    <div class="small" style="margin-top:8px">
+      قالب‌ها: <code>{1,2,3}</code> یا <code>1-5</code> یا <code>x ∈ N | x &lt; 10</code>
+    </div>
     <div class="sets-list" id="setsList"></div>
   </div>
 
@@ -68,17 +40,14 @@
         <option value="subset">زیرمجموعه (⊆)</option>
         <option value="member">عضو بودن (∈)</option>
       </select>
-
       <label>چپ:</label>
       <select id="leftSet"></select>
       <label>راست:</label>
       <select id="rightSet"></select>
-
       <div id="memberBox" style="display:none">
-        <label>عدد برای چک:</label>
+        <label>عدد برای بررسی:</label>
         <input id="memberValue" type="text" placeholder="مثلاً 3">
       </div>
-
       <button id="runOp">اجرا</button>
     </div>
 
@@ -93,7 +62,7 @@
     <div class="venn-wrap">
       <div>
         <h4>نمودار ون</h4>
-        <svg class="venn-svg" id="vennSvg" viewBox="0 0 320 240" xmlns="http://www.w3.org/2000/svg"></svg>
+        <svg class="venn-svg" id="vennSvg" viewBox="0 0 320 240"></svg>
       </div>
       <div style="flex:1">
         <h4>نمایش محوری</h4>
@@ -104,182 +73,9 @@
   </div>
 
   <div class="card hint">
-    <strong>نکته:</strong> خروجی‌ها به زبان فارسی و با نمایش اعداد به شکل عددی (ارقام فارسی) ارائه می‌شوند. اعضا داخل آکولاد نمایش داده می‌شوند.
+    <strong>نکته:</strong> اعداد به صورت فارسی نمایش داده می‌شوند و اعضای مجموعه‌ها داخل آکولاد هستند.
   </div>
 
-  <script>
-    // --- ابزارها ---
-    function toPersianDigits(s){
-      return String(s).replace(/[0-9]/g, d=>"۰۱۲۳۴۵۶۷۸۹"[d]);
-    }
-
-    // مجموعه‌های پایه
-    const baseSets = {
-      N: (limit=50)=>Array.from({length:limit},(_,i)=>i+1),
-      W: (limit=51)=>Array.from({length:limit},(_,i)=>i),
-      Z: (limit=20)=>{const a=[]; for(let i=-limit;i<=limit;i++) a.push(i); return a},
-      Q: (limit=10)=>{const s=new Set(); for(let b=1;b<=6;b++){ for(let a=-limit;a<=limit;a++) s.add(a/b); } return Array.from(s).sort((x,y)=>x-y)},
-      R: (limit=20)=>{const a=[]; for(let i=-limit;i<=limit;i++){ a.push(i); a.push(i+0.5);} return Array.from(new Set(a)).sort((x,y)=>x-y)}
-    };
-
-    // نگهداری مجموعه‌ها
-    const sets = {}; // name -> array
-
-    // پارسر ورودی مجموعه (لیست، رنج، فرم شرطی ساده)
-    function parseExplicitList(text){
-      const s = text.replace(/[{}\s]/g,''); if(!s) return [];
-      const parts = s.split(','); const out=new Set();
-      parts.forEach(p=>{
-        if(/^(-?\d+)-(-?\d+)$/.test(p)){
-          const m=p.match(/^(-?\d+)-(-?\d+)$/); const a=parseInt(m[1]), b=parseInt(m[2]); const start=Math.min(a,b), end=Math.max(a,b);
-          for(let i=start;i<=end;i++) out.add(i);
-        } else if(/^(-?\d+)$/.test(p)) out.add(parseInt(p)); else if(/^(-?\d+\.\d+)$/.test(p)) out.add(parseFloat(p));
-      });
-      return Array.from(out).sort((a,b)=>a-b);
-    }
-
-    function tryParseSetBuilder(text){
-      const t = text.replace(/[{}]/g,'').trim();
-      const m = t.match(/x\s*(?:∈|in)\s*([NZWQRnzwqr])\s*[|]?(.*)/i);
-      if(!m) return null; const base=m[1].toUpperCase(); let cond=(m[2]||'').trim();
-      const candidate = baseSets[base]; if(!candidate) return null; const sample=candidate(50);
-      if(!cond) return sample;
-      if(!/^[x0-9<>=!%+\-*/().\sabsMath]+$/.test(cond)) return null;
-      cond = cond.replace(/abs\(/g,'Math.abs(');
-      try{
-        const f = new Function('x', `return (${cond});`);
-        const res = sample.filter(x=>{ try{return !!f(x);}catch(e){return false;} });
-        return Array.from(new Set(res)).sort((a,b)=>a-b);
-      }catch(e){return null}
-    }
-
-    function parseSetInput(text){ if(!text || !text.trim()) return []; if(/[{},]/.test(text) || /-\d+|\d+-\d+/.test(text)){ const p=parseExplicitList(text); if(p.length) return p; } const pb = tryParseSetBuilder(text); if(pb) return pb; const parts = text.split(/\s+/).filter(Boolean); const nums = parts.map(p=>Number(p)).filter(n=>!Number.isNaN(n)); return nums.sort((a,b)=>a-b);
-    }
-
-    // عملیات روی مجموعه‌ها
-    const toSet = arr => new Set(arr);
-    const setIntersection = (a,b)=>Array.from(new Set(a.filter(x=>b.has(x)))).sort((x,y)=>x-y);
-    const setUnion = (a,b)=>Array.from(new Set([...a,...b])).sort((x,y)=>x-y);
-    const setDifference = (a,b)=>Array.from(new Set(a.filter(x=>!b.has(x)))).sort((x,y)=>x-y);
-    const isSubset = (a,b)=>a.every(x=>b.has(x));
-
-    // عناصر DOM
-    const setNameEl = document.getElementById('setName');
-    const setContentEl = document.getElementById('setContent');
-    const saveBtn = document.getElementById('saveSet');
-    const setsListEl = document.getElementById('setsList');
-    const leftSel = document.getElementById('leftSet');
-    const rightSel = document.getElementById('rightSet');
-    const opSel = document.getElementById('op');
-    const runBtn = document.getElementById('runOp');
-    const symbolicEl = document.getElementById('symbolic');
-    const numericEl = document.getElementById('numeric');
-    const memberBox = document.getElementById('memberBox');
-    const memberValue = document.getElementById('memberValue');
-    const vennSvg = document.getElementById('vennSvg');
-    const numberlineEl = document.getElementById('numberline');
-    const legendEl = document.getElementById('legend');
-    const clearBtn = document.getElementById('clearSets');
-
-    function refreshSetSelectors(){
-      const names = Object.keys(sets);
-      [leftSel,rightSel].forEach(sel=>{
-        sel.innerHTML='';
-        names.forEach(n=>{ const opt=document.createElement('option'); opt.value=n; opt.textContent=n; sel.appendChild(opt); });
-      });
-    }
-
-    function renderSetsList(){
-      setsListEl.innerHTML='';
-      const names = Object.keys(sets);
-      if(names.length===0){ setsListEl.textContent = 'هیچ مجموعه‌ای تعریف نشده است.'; return; }
-      names.forEach(n=>{
-        const d = document.createElement('div'); d.className='set-item';
-        const title = document.createElement('div'); title.innerHTML = `<strong>${n}</strong>`;
-        const content = document.createElement('div'); content.textContent = `${n} = {${sets[n].map(x=>toPersianDigits(x)).join(', ')}}`;
-        const actions = document.createElement('div'); actions.style.marginTop='8px';
-        const btnChoose = document.createElement('button'); btnChoose.textContent='انتخاب'; btnChoose.className='ghost'; btnChoose.style.marginLeft='6px';
-        btnChoose.onclick = ()=>{ leftSel.value = n; rightSel.value = n; };
-        const btnDel = document.createElement('button'); btnDel.textContent='حذف'; btnDel.onclick = ()=>{ delete sets[n]; renderSetsList(); refreshSetSelectors(); drawVenn(); };
-        actions.appendChild(btnChoose); actions.appendChild(btnDel);
-        d.appendChild(title); d.appendChild(content); d.appendChild(actions); setsListEl.appendChild(d);
-      });
-    }
-
-    saveBtn.addEventListener('click', ()=>{
-      const name = (setNameEl.value||'').trim(); if(!name){ alert('نام مجموعه را وارد کنید'); return; }
-      const parsed = parseSetInput(setContentEl.value||''); sets[name]=parsed; setContentEl.value=''; renderSetsList(); refreshSetSelectors(); drawVenn();
-    });
-
-    clearBtn.addEventListener('click', ()=>{ if(!confirm('آیا همه مجموعه‌ها حذف شوند؟')) return; Object.keys(sets).forEach(k=>delete sets[k]); renderSetsList(); refreshSetSelectors(); drawVenn(); });
-
-    opSel.addEventListener('change', ()=>{ memberBox.style.display = opSel.value === 'member' ? 'inline-block' : 'none'; });
-
-    runBtn.addEventListener('click', ()=>{
-      const Lname = leftSel.value; const Rname = rightSel.value; const L = sets[Lname]||[]; const R = sets[Rname]||[]; const sL = toSet(L); const sR = toSet(R);
-      let res=null; let sym='';
-      if(opSel.value === 'intersection'){ res = setIntersection(L,sR); sym = `${Lname} ∩ ${Rname} = {${res.join(', ')}}`; }
-      else if(opSel.value === 'union'){ res = setUnion(L,sR); sym = `${Lname} ∪ ${Rname} = {${res.join(', ')}}`; }
-      else if(opSel.value === 'difference'){ res = setDifference(L,sR); sym = `${Lname} - ${Rname} = {${res.join(', ')}}`; }
-      else if(opSel.value === 'subset'){ const yes = isSubset(L,sR); res = yes; sym = `${Lname} ⊆ ${Rname} = ${yes ? 'درست' : 'نادرست'}`; }
-      else if(opSel.value === 'member'){ const val = Number(memberValue.value); const yes = sR.has(val); res = yes; sym = `${toPersianDigits(val)} ∈ ${Rname} = ${yes ? 'درست' : 'نادرست'}`; }
-      symbolicEl.textContent = sym; if(Array.isArray(res)) numericEl.innerHTML = `{ ${res.map(x=>toPersianDigits(x)).join(', ')} }`; else numericEl.textContent = String(res);
-      drawVenn(); drawNumberLine(res);
-    });
-
-    function drawVenn(){
-      // رسم دو دایره ساده و قرار دادن عناصری که فقط در A، فقط در B، مشترک و بیرون هستند
-      const names = Object.keys(sets);
-      vennSvg.innerHTML = '';
-      if(names.length < 2){ vennSvg.innerHTML = '<text x="20" y="40" font-size="14">برای دیدن نمودار ون حداقل دو مجموعه نیاز است (تعریف کنید و سپس انتخاب کنید)</text>'; return; }
-      const A = sets[leftSel.value]||[]; const B = sets[rightSel.value]||[]; const sA = toSet(A); const sB = toSet(B);
-      const onlyA = A.filter(x=>!sB.has(x)); const onlyB = B.filter(x=>!sA.has(x)); const both = A.filter(x=>sB.has(x));
-
-      // پس‌زمینه دایره‌ها
-      const svgNS = 'http://www.w3.org/2000/svg';
-      const c1 = document.createElementNS(svgNS,'circle'); c1.setAttribute('cx',120); c1.setAttribute('cy',110); c1.setAttribute('r',70); c1.setAttribute('fill','rgba(0,119,204,0.18)'); c1.setAttribute('stroke','#0077cc');
-      const c2 = document.createElementNS(svgNS,'circle'); c2.setAttribute('cx',200); c2.setAttribute('cy',110); c2.setAttribute('r',70); c2.setAttribute('fill','rgba(233,30,99,0.18)'); c2.setAttribute('stroke','#e91e63');
-      vennSvg.appendChild(c1); vennSvg.appendChild(c2);
-      // برچسب‌ها
-      const tA = document.createElementNS(svgNS,'text'); tA.setAttribute('x',90); tA.setAttribute('y',60); tA.textContent = leftSel.value; vennSvg.appendChild(tA);
-      const tB = document.createElementNS(svgNS,'text'); tB.setAttribute('x',230); tB.setAttribute('y',60); tB.textContent = rightSel.value; vennSvg.appendChild(tB);
-
-      // قرار دادن اعضا: محله‌ها را با مختصات تقریبی پر می‌کنیم
-      function putItems(list, x,y, dx=0,dy=0){
-        list.forEach((val,idx)=>{
-          const tx = x + (idx%4)*18 + (Math.random()*8-4);
-          const ty = y + Math.floor(idx/4)*18 + (Math.random()*6-3);
-          const t = document.createElementNS(svgNS,'text'); t.setAttribute('x',tx); t.setAttribute('y',ty); t.setAttribute('font-size',12); t.textContent = toPersianDigits(val);
-          vennSvg.appendChild(t);
-        });
-      }
-      putItems(onlyA,80,110); putItems(both,150,110); putItems(onlyB,220,110);
-
-      // توضیح زیر نمودار
-      const info = document.createElementNS(svgNS,'text'); info.setAttribute('x',20); info.setAttribute('y',220); info.setAttribute('font-size',12); info.setAttribute('fill','#444');
-      info.textContent = `تنظیمات: A=${leftSel.value}  B=${rightSel.value}`; vennSvg.appendChild(info);
-    }
-
-    function drawNumberLine(res){
-      numberlineEl.innerHTML = '';
-      let highlights = [];
-      if(Array.isArray(res)) highlights = res.slice(0,50); else { const R = sets[rightSel.value]||[]; highlights = Array.isArray(R)? R.slice(0,50) : []; }
-      if(highlights.length===0){ numberlineEl.textContent = 'محدودهٔ نمایشی خالی است.'; legendEl.innerHTML=''; return; }
-      const min = Math.min(...highlights)-2; const max = Math.max(...highlights)+2;
-      const container = document.createElement('div'); container.style.position='relative'; container.style.height='70px'; container.style.borderTop='1px solid #333';
-      for(let i=min;i<=max;i++){
-        const left = ((i-min)/(max-min))*100;
-        const dot = document.createElement('div'); dot.style.position='absolute'; dot.style.left = left + '%'; dot.style.top='10px'; dot.style.transform='translateX(-50%)'; dot.style.textAlign='center';
-        const point = document.createElement('div'); point.style.width='8px'; point.style.height='8px'; point.style.borderRadius='50%'; point.style.margin='6px auto'; point.style.background = highlights.includes(i)? 'var(--pink)' : '#999';
-        const label = document.createElement('div'); label.style.fontSize='12px'; label.textContent = toPersianDigits(i);
-        dot.appendChild(point); dot.appendChild(label); container.appendChild(dot);
-      }
-      numberlineEl.appendChild(container);
-      legendEl.innerHTML = `<div class="small">توضیح: نقاط رنگی اعضای انتخاب‌شده را نشان می‌دهند.</div>`;
-    }
-
-    // مقدار پیش‌فرض نمونه
-    sets['A'] = [1,2,3,4,5]; sets['B'] = [4,5,6,7]; renderSetsList(); refreshSetSelectors(); drawVenn();
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
