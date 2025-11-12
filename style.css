@@ -1,0 +1,100 @@
+:root {
+  --accent: #0077cc;
+  --pink: #e91e63;
+}
+
+body {
+  font-family: 'Vazir', Tahoma, sans-serif;
+  margin: 18px;
+  background: #f7f9fc;
+  color: #222;
+}
+
+h1 { font-size: 26px; margin-bottom: 6px; }
+
+.card {
+  background: white;
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 6px 18px rgba(12,30,60,0.06);
+  margin-bottom: 14px;
+}
+
+label { display: inline-block; margin-left: 8px; }
+
+input[type=text], select {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  min-width: 160px;
+}
+
+button {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button.ghost {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.flex { display: flex; gap: 10px; align-items: center; }
+.wrap { flex-wrap: wrap; }
+
+.sets-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.set-item {
+  border: 1px solid #e6e6e6;
+  padding: 8px;
+  border-radius: 8px;
+  min-width: 130px;
+}
+
+.small { font-size: 13px; color: #666; }
+
+pre {
+  background: #fafafa;
+  padding: 8px;
+  border-radius: 6px;
+  overflow: auto;
+}
+
+.venn-wrap { display: flex; gap: 14px; align-items: flex-start; }
+.venn-svg {
+  width: 320px;
+  height: 240px;
+  background: linear-gradient(180deg, #fff, #fbfdff);
+  border-radius: 6px;
+  border: 1px solid #eee;
+}
+
+.numberline {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px dashed #ddd;
+  background: white;
+}
+
+@media (max-width: 700px) {
+  .venn-wrap { flex-direction: column; }
+  .venn-svg { width: 100%; }
+}
+
+.hint {
+  background: #fff8e6;
+  border-left: 4px solid #ffd166;
+  padding: 8px;
+  border-radius: 6px;
+  color: #6b4f00;
+}
